@@ -4,21 +4,21 @@ describe package('memcached') do
   it { should be_installed }
 end
 
-describe file('/path/to/file') do
+memcached_port = 11_211
+memcached_port = property['memcached_cfg']['port'] if property['memcached_cfg'].key?('port')
+
+describe file('/etc/sysconfig/memcached') do
   it { should exist }
   it { should be_file }
-  its(:content) { should match(/ServerName www.example.jp/) }
-  it { should contain 'ServerName www.example.jp' }
-  it { should contain('rspec').from(/^group :test do/).to(/^end/) }
-  it { should contain('rspec').after(/^group :test do/) }
-  it { should contain('rspec').before(/^end/) }
-  it { should be_directory }
-  it { should be_readable }
-  it { should be_writable }
-  it { should be_symlink }
-  it { should be_linked_to '/etc/redhat-release' }
-  it { should be_executable }
-  it { should be_mode 440 }
+  it { should contain "PORT=\"#{memcached_port}\"" }
+  it { should contain "USER=\"#{property['memcached_cfg']['user']}\"" }
+  it { should contain "MAXCONN=\"#{property['memcached_cfg']['maxconn']}\"" }
+  it { should contain "CACHESIZE=\"#{property['memcached_cfg']['cachesize']}\"" }
+  memcached_options = property['memcached_cfg']['options']
+  if property['memcached_cfg']['options'].is_a?(Array)
+    memcached_options = property['memcached_cfg']['options'].join(' ')
+  end
+  it { should contain "OPTIONS=\"#{memcached_options}\"" }
 end
 
 describe service('memcached') do
@@ -26,6 +26,6 @@ describe service('memcached') do
   it { should be_running }
 end
 
-describe port(11211) do
+describe port(memcached_port) do
   it { should be_listening }
 end

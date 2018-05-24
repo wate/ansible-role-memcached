@@ -1,2 +1,9 @@
 ---
-# handlers file for memcached
+- name: restart memcached
+  systemd:
+    name: memcached
+    state: restarted
+- name: reload td-agent
+  systemd:
+    name: td-agent
+    state: reloaded
